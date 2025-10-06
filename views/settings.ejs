@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title><%= title %></title>
+  <link rel='stylesheet' href='/stylesheets/style.css' />
+</head>
+<body class="container">
+  <header>
+    <h1><%= title %></h1>
+    <p><a href="/">トップページに戻る</a></p>
+  </header>
+
+  <main>
+    <section id="sound-upload">
+      <h2>新しいアラーム音をアップロード</h2>
+      <p>MP3, WAV, OGG 形式の音声ファイルをアップロードできます。</p>
+      
+      <!-- ★ここが重要！ ファイルアップロード用のフォーム -->
+      <form action="/settings/upload" method="post" enctype="multipart/form-data">
+        <div class="form-group">
+          <label for="alarmSound">音声ファイル:</label>
+          <input type="file" name="alarmSound" id="alarmSound" accept="audio/*" class="form-control-file" required>
+        </div>
+        <button type="submit">アップロード</button>
+      </form>
+    </section>
+
+    <!-- views/settings.ejs -->
+<section id="current-sounds">
+  <h2>現在のアラーム音</h2>
+  <!-- ★サーバーから渡された sounds 配列を使ってリストを生成 -->
+  <ul>
+    <% if (sounds && sounds.length > 0) { %>
+      <% sounds.forEach(function(sound) { %>
+        <li>
+          <%= sound %>
+          <audio controls src="/sounds/<%= sound %>" style="vertical-align: middle; margin-left: 10px;"></audio>
+        </li>
+      <% }); %>
+    <% } else { %>
+      <li>アップロードされた音声ファイルはありません。</li>
+    <% } %>
+  </ul>
+</section>
+  </main>
+
+</body>
+</html>

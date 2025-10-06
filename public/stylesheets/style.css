@@ -1,0 +1,155 @@
+/* --- 全体の基本スタイル --- */
+:root {
+  --primary-color: #4a90e2; /* 鮮やかな青 */
+  --secondary-color: #50e3c2; /* 明るいミントグリーン */
+  --dark-blue: #0d253f;     /* 深い紺色 */
+  --light-gray: #f8f9fa;    /* 明るい背景色 */
+  --text-color: #343a40;    /* 基本の文字色 */
+  --border-color: #dee2e6;  /* 境界線の色 */
+}
+
+body {
+  font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+  margin: 0;
+  background-color: var(--light-gray);
+  color: var(--text-color);
+  line-height: 1.6;
+}
+
+.container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+}
+
+/* --- ヘッダー --- */
+header {
+  text-align: center;
+  padding-bottom: 1.5rem;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+header h1 {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: var(--dark-blue);
+  margin: 0;
+}
+
+/* --- 各セクションのスタイル --- */
+section {
+  margin-bottom: 2.5rem;
+  padding: 1.5rem;
+  background-color: #fff;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+h2 {
+  font-size: 1.5rem;
+  color: var(--primary-color);
+  margin-top: 0;
+  border-bottom: 2px solid var(--secondary-color);
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+/* --- 今日の睡眠時間 & おすすめ起床時間 --- */
+.sleep-time {
+  font-size: 3rem;
+  font-weight: 300;
+  color: var(--dark-blue);
+  text-align: center;
+}
+
+#recommendation .alert {
+  background-color: #e2f3ff;
+  border-color: #b6e0ff;
+  color: #004085;
+}
+
+#recommendation ul {
+  padding-left: 20px;
+  margin-bottom: 0;
+}
+
+/* --- アラームリスト --- */
+.alarm-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+.alarm-item:last-child {
+  border-bottom: none;
+}
+.alarm-time {
+  font-size: 1.75rem;
+  font-weight: bold;
+}
+.alarm-item small {
+  color: #6c757d;
+}
+
+/* --- ボタンのスタイル --- */
+button,
+input[type="submit"] {
+  padding: 10px 20px;
+  cursor: pointer;
+  background: linear-gradient(145deg, var(--secondary-color), var(--primary-color));
+  color: white;
+  border: none;
+  border-radius: 20px; /* 角を丸く */
+  font-size: 1rem;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+button:hover,
+input[type="submit"]:hover {
+  transform: translateY(-2px); /* 少し浮き上がる効果 */
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.delete-alarm {
+  background: #dc3545;
+}
+.delete-alarm:hover {
+  background: #c82333;
+}
+
+
+/* --- モーダルのスタイル --- */
+.modal-content {
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.time-picker input {
+  font-size: 1.5rem;
+  width: 80px;
+  padding: 10px;
+  text-align: center;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+}
+
+/* --- フォーム要素 --- */
+.form-control {
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+}
+
+/* --- グラフのコンテナ --- */
+.chart-container {
+  position: relative;
+  height: 300px;
+  width: 100%;
+}

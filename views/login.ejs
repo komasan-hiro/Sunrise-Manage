@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title><%= title %></title>
+  <link rel='stylesheet' href='/stylesheets/style.css' />
+</head>
+<body class="container">
+  <header>
+    <h1><%= title %></h1>
+    <p>アカウントをお持ちでない場合は、<a href="/users/register">こちらから登録</a>してください。</p>
+  </header>
+
+  <main>
+    <!-- (オプション) ログイン失敗時のエラーメッセージを表示 -->
+    <% if (typeof messages !== 'undefined' && messages.error) { %>
+      <div class="alert alert-danger" style="background-color: #f8d7da; color: #721c24; padding: 10px; border-radius: 5px; margin-bottom: 15px;">
+        <%= messages.error %>
+      </div>
+    <% } %>
+
+    <form action="/users/login" method="post">
+      <div class="form-group">
+        <label for="email">メールアドレス:</label>
+        <input type="email" id="email" name="email" class="form-control" required>
+      </div>
+      <div class="form-group">
+        <label for="password">パスワード:</label>
+        <input type="password" id="password" name="password" class="form-control" required>
+      </div>
+      <button type="submit">ログイン</button>
+    </form>
+  </main>
+</body>
+</html>

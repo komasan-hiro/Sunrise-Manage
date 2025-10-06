@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/stylesheets/style.css">
+</head>
+
+<body>
+  <div class="container">
+    <header>
+      <h1><%= title %></h1>
+      <% if (user) { %>
+    <div>
+      <span>ようこそ, <%= user.email %> さん</span> | 
+      <a href="/users/logout">ログアウト</a> | 
+      <a href="/settings">アラーム音の管理</a>
+    </div>
+  <% } %>
+    </header>
+
+    <main>
+      <section id="today-sleep">
+        <h2>今日の睡眠時間</h2>
+        <p class="sleep-time"><%= data.todaySleep %></p>
+        <button id="more-info">もっと見る</button>
+      </section>
+
+      <section id="recommendation">
+        <h2>おすすめ起床時間</h2>
+        <form method="post" action="/calculate-wakeup">
+          <div class="form-group" style="margin-bottom: 10px;">
+            <label for="bedtime">あなたの平均的な就寝時刻を入力してください：</label>
+            <input type="time" id="bedtime" name="bedtime" class="form-control" value="23:30" required style="display: inline-block; width: auto; vertical-align: middle;">
+            <button type="submit" class="btn btn-info" style="vertical-align: middle;">再計算</button>
+          </div>
+        </form>
+        <% if (data.recommendation) { %>
+          <div class="alert alert-success mt-3" style="background-color: #d4edda; padding: 15px; border-radius: 5px;">
+            <% if (typeof data.recommendation === 'string') { %>
+              <p><%= data.recommendation %></p>
+            <% } else { %>
+              <p><%= data.recommendation.message %></p>
+              <ul>
+                <% data.recommendation.times.forEach(function(time) { %>
+                  <li><%= time %></li>
+                <% }); %>
+              </ul>
+            <% } %>
+          </div>
+        <% } %>
+      </section>
+
+      <section id="alarms">
+        <h2>今設定されているアラーム</h2>
+        <div id="alarm-list"></div>
+        <button id="set-alarm">アラーム設定</button>
+      </section>
+    </main>
+
+    <!-- --- アラーム設定モーダル --- -->
+    <div id="alarm-modal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>アラーム設定</h2>
+        <div class="time-picker">
+          <input type="number" id="hour" placeholder="09" min="0" max="23">
+          :
+          <input type="number" id="minute" placeholder="00" min="0" max="59">
+        </div>
+        <div class="sound-options">
+          <h3>サウンド</h3>
+          <!-- ★サーバーから渡された sounds 配列でチェックボックスを動的に生成 -->
+          <% if (locals.sounds && sounds.length > 0) { %>
+            <% sounds.forEach(function(sound, index) { %>
+              <div>
+                <input type="checkbox" id="sound-<%= index %>-nonrem" name="sound-nonrem" value="<%= sound %>">
+                <label for="sound-<%= index %>-nonrem"><%= sound %> (ノンレム)</label>
+              </div>
+              <div>
+                <input type="checkbox" id="sound-<%= index %>-rem" name="sound-rem" value="<%= sound %>">
+                <label for="sound-<%= index %>-rem"><%= sound %> (レム)</label>
+              </div>
+            <% }); %>
+          <% } else { %>
+            <p>利用できるサウンドがありません。<a href="/settings">設定ページ</a>でアップロードしてください。</p>
+          <% } %>
+        </div>
+        <button id="save-alarm">設定</button>
+      </div>
+    </div>
+
+    <!-- --- 睡眠履歴モーダル --- -->
+    <div id="sleep-history-modal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>睡眠時間一覧</h2>
+        <section id="weekly-sleep">
+          <h3>1週間の睡眠時間</h3>
+          <div class="chart-container">
+            <canvas id="weekly-sleep-chart"></canvas>
+          </div>
+        </section>
+        <section id="monthly-sleep">
+          <h3>1ヶ月の睡眠時間</h3>
+          <div class="chart-container">
+            <canvas id="monthly-sleep-chart"></canvas>
+          </div>
+        </section>
+      </div>
+    </div>
+
+  </div> <!-- .container の閉じタグ -->
+
+  <div id="ringing-modal" class="modal" style="background-color: rgba(0, 0, 0, 0.75);">
+    <div class="modal-content" style="text-align: center; margin-top: 30vh; animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both infinite;">
+      <h2>アラーム</h2>
+      <p style="font-size: 1.2rem; margin-bottom: 2rem;">おはようございます！</p>
+      <button id="stop-alarm-button" style="padding: 20px 40px; font-size: 1.5rem; background: #dc3545;">アラームを停止</button>
+    </div>
+  </div>
+
+  <!-- --- スクリプト読み込み --- -->
+  <!-- 1. サーバーからのデータをJavaScript変数に格納 -->
+  <script>
+    const serverData = <%- jsonData %>;
+  </script>
+  
+  <!-- 2. 外部ライブラリ本体 (Chart.js) を読み込む -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- 3. 自分のカスタムスクリプトを読み込む -->
+  <script src="/javascripts/graph.js"></script> 
+  <script src="/javascripts/alarm.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,19 @@
+# 依存関係パッケージ (インストールすれば復元できるので不要)
+/node_modules
+
+# 環境変数ファイル (秘密の鍵！)
+.env
+
+# ユーザー固有の認証トークンファイル (秘密の鍵！)
+fitbit-tokens.json
+pkce-verifier.txt
+
+# データベースファイル (個人データを含む)
+*.sqlite3
+
+# OSが自動生成するファイル
+.DS_Store
+Thumbs.db
+
+# npmのデバッグログ
+npm-debug.log*
