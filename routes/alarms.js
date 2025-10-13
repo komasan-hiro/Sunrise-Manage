@@ -54,7 +54,7 @@ router.get('/check', async (req, res, next) => {
     }
 
     const now = new Date();
-    const alarmToFire = alarms.find(a => a.is_on === 1 && a.hour === now.getHours() && a.minute === now.getMinutes());
+    const alarmToFire = alarms.find(a => a.is_on && a.hour === now.getHours() && a.minute === now.getMinutes());
 
     if (alarmToFire) {
       const restingRate = await db.getRestingHeartRate(req.user.fitbit_user_id);
