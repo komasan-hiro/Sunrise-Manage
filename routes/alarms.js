@@ -77,7 +77,7 @@ router.get('/check', async (req, res, next) => {
     const outputFileName = `${userId}_${Date.now()}.mp3`;
     const outputPath = path.join(__dirname, '../public/mixed_sounds/', outputFileName);
 
-    await mixer.mixAlarmSounds(soundPaths, sleepDepthIndex, outputPath);
+    await mixer.mixAlarmSounds(soundPaths, sleepDepthIndex,true, outputPath);
     const soundUrl = `/mixed_sounds/${outputFileName}`;
     console.log(`[SUCCESS] アラーム発火準備完了: サウンドURL=${soundUrl}`);
     res.json({ shouldFire: true, sound: soundUrl });
