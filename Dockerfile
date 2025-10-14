@@ -1,4 +1,3 @@
-```dockerfile
 # ベースとなる公式Node.jsイメージを選択 (LTS版を推奨)
 FROM node:18-slim
 
