@@ -186,7 +186,8 @@ function playAlarmSound(soundFile) {
     if (window.currentAlarm && !window.currentAlarm.paused) {
         window.currentAlarm.pause();
     }
-    const audio = new Audio(`/sounds/${soundFile}`);
+    const audio = new Audio(soundFile);
+    
     audio.loop = true;
     audio.play().catch(error => console.error('音声の再生に失敗しました:', error));
     window.currentAlarm = audio;
