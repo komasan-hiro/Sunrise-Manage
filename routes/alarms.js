@@ -87,4 +87,4 @@ router.get('/check', async (req, res, next) => {
   }
 });
 
-module.logins = router;
+module.exports = router;
