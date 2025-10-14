@@ -157,7 +157,7 @@ function startAlarmChecker() {
  */
 async function checkAndFireAlarm() {
   try {
-    const response = await fetch('/alarms/check');
+    const response = await fetch('/alarms/check', { cache: 'no-cache' });
     const data = await response.json();
     if (data.shouldFire && data.sound) {
       console.log(`アラームを発火！ サウンド: ${data.sound}`);
