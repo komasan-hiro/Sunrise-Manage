@@ -22,6 +22,7 @@ var alarmsRouter = require('./routes/alarms');
 var usersRouter = require('./routes/users'); // ★ユーザー認証用ルーターを追加
 
 var app = express();
+app.set('trust proxy', 1); 
 
 // --- View Engine Setup ---
 app.set('views', path.join(__dirname, 'views'));
