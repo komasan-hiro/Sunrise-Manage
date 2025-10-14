@@ -17,3 +17,5 @@ Thumbs.db
 
 # npmのデバッグログ
 npm-debug.log*
+
+/public/mixed_sounds/

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../lib/database');
 const fitbit = require('../lib/fitbit-api');
+const mixer = require('../lib/mixer'); // ★ mixer.jsをインポート
 
 // このルーターのすべてのAPIにログインチェックを適用するミドルウェア
 router.use((req, res, next) => {
