@@ -2,18 +2,14 @@ const express = require('express');
 const router = express.Router();
 const path = require('path');
 const db = require('../lib/database');
-const mixer = require('../lib/mixer'); // mixer.jsは残す
-const { utcToZonedTime } = require('date-fns-tz');
+const mixer = require('../lib/mixer'); // mixer.jsは使います
 
-// このルーターのすべてのAPIにログインチェックを適用するミドルウェア
+// --- 既存のアラーム操作API (変更なし) ---
 router.use((req, res, next) => {
-  if (req.isAuthenticated()) {
-    return next();
-  }
+  if (req.isAuthenticated()) { return next(); }
   res.status(401).json({ success: false, message: 'Authentication required' });
 });
 
-// --- 既存のアラーム操作API ---
 router.post('/add', async (req, res, next) => {
   try {
     const newAlarm = await db.addAlarm(req.user.id, req.body);
@@ -44,32 +40,39 @@ router.post('/toggle/:id', async (req, res, next) => {
   }
 });
 
-
+// --- インテリジェント・アラームのチェックAPI (新ロジック) ---
 router.get('/check', async (req, res, next) => {
   try {
     const userId = req.user.id;
     const alarms = await db.getAlarms(userId);
     if (!req.user.fitbit_user_id) return res.json({ shouldFire: false });
 
-    const timeZone = 'Asia/Tokyo';
-    const now = utcToZonedTime(new Date(), timeZone);
+    // ★★★ これが、外部ライブラリを使わない、新しいタイムゾーン解決策です ★★★
+    // 1. サーバーの現在時刻(UTC)を取得
+    const now = new Date();
+    // 2. UTC時刻に9時間（日本の時差）を足して、日本の現在時刻を計算する
+    now.setUTCHours(now.getUTCHours() + 9);
+    // 3. 日本の「時」と「分」を、UTCメソッドから安全に取得する
+    const currentHourInJapan = now.getUTCHours();
+    const currentMinuteInJapan = now.getUTCMinutes();
 
-    const alarmToFire = alarms.find(a => a.is_on && a.hour === now.getHours() && a.minute === now.getMinutes());
+    const alarmToFire = alarms.find(a => a.is_on && a.hour === currentHourInJapan && a.minute === currentMinuteInJapan);
     
     if (!alarmToFire) return res.json({ shouldFire: false });
 
     console.log(`★★★ アラーム時刻を検知しました: ${alarmToFire.hour}:${String(alarmToFire.minute).padStart(2,'0')} ★★★`);
 
+    // --- デバッグモードのロジック (偶数/奇数分で判定) ---
     let sleepDepthIndex = 0.5;
-    const currentMinute = now.getMinutes();
-    if (currentMinute % 2 === 0) {
+    if (currentMinuteInJapan % 2 === 0) {
       sleepDepthIndex = 1.0;
-      console.log(`[DEBUG MODE] 現在の分(${currentMinute})が偶数なので、眠りを「深い」(1.0)と判定しました。`);
+      console.log(`[DEBUG MODE] 現在の分(${currentMinuteInJapan})が偶数なので、眠りを「深い」(1.0)と判定しました。`);
     } else {
       sleepDepthIndex = 0.0;
-      console.log(`[DEBUG MODE] 現在の分(${currentMinute})が奇数なので、眠りを「浅い」(0.0)と判定しました。`);
+      console.log(`[DEBUG MODE] 現在の分(${currentMinuteInJapan})が奇数なので、眠りを「浅い」(0.0)と判定しました。`);
     }
 
+    // --- ミキシング処理 (変更なし) ---
     const soundPaths = { nonrem: path.join(__dirname, '../public/sounds/', alarmToFire.sound_nonrem), rem: path.join(__dirname, '../public/sounds/', alarmToFire.sound_rem) };
     const outputFileName = `${userId}_${Date.now()}.mp3`;
     const outputPath = path.join(__dirname, '../public/mixed_sounds/', outputFileName);
@@ -84,4 +87,4 @@ router.get('/check', async (req, res, next) => {
   }
 });
 
-module.exports = router;
+module.logins = router;
