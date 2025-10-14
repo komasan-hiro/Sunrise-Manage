@@ -3,6 +3,8 @@ const router = express.Router();
 const db = require('../lib/database');
 const fitbit = require('../lib/fitbit-api');
 const mixer = require('../lib/mixer'); // ★ mixer.jsをインポート
+const { utcToZonedTime } = require('date-fns-tz');
+
 
 // このルーターのすべてのAPIにログインチェックを適用するミドルウェア
 router.use((req, res, next) => {
@@ -54,9 +56,11 @@ router.get('/check', async (req, res, next) => {
         return res.json({ shouldFire: false });
     }
 
-    const now = new Date();
-    const alarmToFire = alarms.find(a => a.is_on && a.hour === now.getHours() && a.minute === now.getMinutes());
+    const timeZone = 'Asia/Tokyo';
+    const now = utcToZonedTime(new Date(), timeZone); // new Date() を変換
 
+    const alarmToFire = alarms.find(a => a.is_on && a.hour === now.getHours() && a.minute === now.getMinutes());
+    
     if (alarmToFire) {
       const restingRate = await db.getRestingHeartRate(req.user.fitbit_user_id);
       const recentHeartRates = await fitbit.getRecentHeartRate(userId);
