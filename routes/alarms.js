@@ -2,11 +2,7 @@ const express = require('express');
 const router = express.Router();
 const path = require('path');
 const db = require('../lib/database');
-const fitbit = require('../lib/fitbit-api');
-const mixer = require('../lib/mixer');
-
-// ★★★ ここが最重要の修正点です ★★★
-// date-fns-tzライブラリから、正しく関数をインポートします
+const mixer = require('../lib/mixer'); // mixer.jsは残す
 const { utcToZonedTime } = require('date-fns-tz');
 
 // このルーターのすべてのAPIにログインチェックを適用するミドルウェア
@@ -49,14 +45,12 @@ router.post('/toggle/:id', async (req, res, next) => {
 });
 
 
-// --- インテリジェント・アラームのチェックAPI ---
 router.get('/check', async (req, res, next) => {
   try {
     const userId = req.user.id;
     const alarms = await db.getAlarms(userId);
     if (!req.user.fitbit_user_id) return res.json({ shouldFire: false });
 
-    // 日本のタイムゾーンで現在時刻を取得
     const timeZone = 'Asia/Tokyo';
     const now = utcToZonedTime(new Date(), timeZone);
 
@@ -67,31 +61,20 @@ router.get('/check', async (req, res, next) => {
     console.log(`★★★ アラーム時刻を検知しました: ${alarmToFire.hour}:${String(alarmToFire.minute).padStart(2,'0')} ★★★`);
 
     let sleepDepthIndex = 0.5;
-    try {
-      const restingRate = await db.getRestingHeartRate(req.user.fitbit_user_id);
-      const recentHeartRates = await fitbit.getRecentHeartRate(userId);
-      if (restingRate && recentHeartRates && recentHeartRates.length > 0) {
-        const latestHeartRate = recentHeartRates.slice(-1)[0].value;
-        console.log(`[INFO] 安静時心拍数: ${restingRate}, 最新の心拍数: ${latestHeartRate}`);
-        const awakeThreshold = restingRate + 20;
-        const awakeRatio = (latestHeartRate - restingRate) / (awakeThreshold - restingRate);
-        sleepDepthIndex = Math.max(0.0, Math.min(1.0, 1.0 - awakeRatio));
-        console.log(`[INFO] 計算された眠りの深さ指数: ${sleepDepthIndex.toFixed(3)}`);
-      }
-    } catch (hrError) {
-      console.error('[WARN] 心拍数データの取得または計算に失敗:', hrError.message);
+    const currentMinute = now.getMinutes();
+    if (currentMinute % 2 === 0) {
+      sleepDepthIndex = 1.0;
+      console.log(`[DEBUG MODE] 現在の分(${currentMinute})が偶数なので、眠りを「深い」(1.0)と判定しました。`);
+    } else {
+      sleepDepthIndex = 0.0;
+      console.log(`[DEBUG MODE] 現在の分(${currentMinute})が奇数なので、眠りを「浅い」(0.0)と判定しました。`);
     }
 
-    const soundPaths = {
-      nonrem: path.join(__dirname, '../public/sounds/', alarmToFire.sound_nonrem),
-      rem: path.join(__dirname, '../public/sounds/', alarmToFire.sound_rem)
-    };
-    
+    const soundPaths = { nonrem: path.join(__dirname, '../public/sounds/', alarmToFire.sound_nonrem), rem: path.join(__dirname, '../public/sounds/', alarmToFire.sound_rem) };
     const outputFileName = `${userId}_${Date.now()}.mp3`;
     const outputPath = path.join(__dirname, '../public/mixed_sounds/', outputFileName);
 
     await mixer.mixAlarmSounds(soundPaths, sleepDepthIndex, outputPath);
-
     const soundUrl = `/mixed_sounds/${outputFileName}`;
     console.log(`[SUCCESS] アラーム発火準備完了: サウンドURL=${soundUrl}`);
     res.json({ shouldFire: true, sound: soundUrl });
