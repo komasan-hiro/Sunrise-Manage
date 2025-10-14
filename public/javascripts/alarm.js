@@ -157,7 +157,14 @@ function startAlarmChecker() {
  */
 async function checkAndFireAlarm() {
   try {
-    const response = await fetch('/alarms/check', { cache: 'no-cache' });
+     // ★★★ ここからが変更点 ★★★
+    // 1. 現在時刻のミリ秒を取得して、URLに「?t=...」の形で付け加える
+    const uniqueUrl = `/alarms/check?t=${new Date().getTime()}`;
+
+    // 2. 新しく生成した、毎回違うURLにリクエストを送る
+    //    (こうすることで、ブラウザは絶対にキャッシュを使えなくなる)
+    const response = await fetch(uniqueUrl); 
+    // ★★★ ここまでが変更点 ★★★
     const data = await response.json();
     if (data.shouldFire && data.sound) {
       console.log(`アラームを発火！ サウンド: ${data.sound}`);
